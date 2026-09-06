@@ -39,8 +39,8 @@ def collect_labels(
     """Download FIRMS CSV chunks that cover the requested AOI and dates."""
 
     validate_date_range(start_date, end_date)
-    if not 1 <= chunk_days <= 10:
-        raise ValueError("--chunk-days must be between 1 and 10 for the FIRMS area API.")
+    if not 1 <= chunk_days <= 5:
+        raise ValueError("--chunk-days must be between 1 and 5 for the FIRMS area API.")
 
     map_key = environment_value("FIRMS_MAP_KEY")
     aoi = load_aoi(region)
@@ -62,7 +62,12 @@ def collect_labels(
         try:
             with urlopen(request_url, timeout=90) as response:
                 content = response.read().decode("utf-8")
-        except (HTTPError, URLError) as error:
+        except HTTPError as error:
+            detail = error.read().decode("utf-8", errors="replace").strip()
+            raise RuntimeError(
+                f"FIRMS request failed for {chunk_start}: HTTP {error.code} {detail[:300]}"
+            ) from error
+        except URLError as error:
             raise RuntimeError(f"FIRMS request failed for {chunk_start}: {error}") from error
 
         if not content.lstrip().startswith("latitude,"):
@@ -108,8 +113,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--chunk-days",
         type=int,
-        default=10,
-        help="Days per FIRMS API request, from 1 to 10 (default: 10).",
+        default=5,
+        help="Days per FIRMS API request, from 1 to 5 (default: 5).",
     )
     return parser
 

@@ -5,6 +5,7 @@ Milestone 1.3 keeps all downloaded observations outside Git under this layout:
 ```text
 datasets/
 ├── aoi/                         # Versioned GeoJSON study boundaries
+├── collection_manifests/         # Versioned summaries of completed collection runs
 └── raw/
     ├── uttarakhand/
     │   ├── satellite/
@@ -21,6 +22,8 @@ datasets/
 ```
 
 `datasets/raw/` is ignored by Git. This keeps downloaded API responses, Sentinel-derived scene summaries, and FIRMS CSV files out of the repository while retaining the collection code, AOI definitions, command arguments, and output metadata needed to reproduce them.
+
+`datasets/collection_manifests/` contains small, versioned summaries of completed pulls. These record the time window, source products, output paths, and validation counts without committing raw observations or secrets.
 
 ## Collection Commands
 
@@ -47,4 +50,4 @@ Weather collection uses the Open-Meteo Archive API and does not require a key. T
 
 Satellite collection uses Google Earth Engine and the Sentinel-2 Surface Reflectance Harmonized collection. Set `EE_PROJECT` in the ignored repository-root `.env` after authenticating an Earth Engine-enabled Google account and choosing a Google Cloud project.
 
-FIRMS label collection uses the NASA FIRMS Area API. Set its free `FIRMS_MAP_KEY` in `.env`; it is never committed. The script downloads CSV files in ten-day chunks and writes a manifest describing the run.
+FIRMS label collection uses the NASA FIRMS Area API. Set its free `FIRMS_MAP_KEY` in `.env`; it is never committed. The script downloads CSV files in five-day chunks and writes a manifest describing the run.
