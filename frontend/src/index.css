@@ -1,0 +1,13 @@
+:root {
+  font-family: Arial, sans-serif;
+  color: #1d1d1d;
+  background: #f7f7f7;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  padding: 2rem;
+}

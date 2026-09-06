@@ -1,0 +1,29 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Node.js
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# IDE and system files
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Generated data and experiment artifacts
+datasets/raw/
+datasets/processed/
+experiments/*.csv
+experiments/*.png
