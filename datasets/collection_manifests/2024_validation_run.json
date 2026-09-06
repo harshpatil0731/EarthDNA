@@ -1,0 +1,65 @@
+{
+  "run_id": "2024_validation_run",
+  "time_window": {
+    "start_date": "2024-01-01",
+    "end_date": "2024-12-31"
+  },
+  "purpose": "Milestone 1.3 parameterized collection validation across all three EarthDNA regions.",
+  "raw_data_policy": "All listed raw output paths are ignored by Git; this manifest contains metadata and validation counts only.",
+  "regions": {
+    "uttarakhand": {
+      "weather": {
+        "source": "Open-Meteo Archive API",
+        "daily_observations": 366,
+        "output": "datasets/raw/uttarakhand/weather/open_meteo_daily_2024-01-01_2024-12-31.json"
+      },
+      "satellite": {
+        "source": "COPERNICUS/S2_SR_HARMONIZED via Google Earth Engine",
+        "scene_summaries": 110,
+        "output": "datasets/raw/uttarakhand/satellite/sentinel2_ndvi_ndwi_2024-01-01_2024-12-31.geojson"
+      },
+      "labels": {
+        "source": "NASA FIRMS Area API / VIIRS_NOAA20_SP",
+        "chunks": 74,
+        "active_fire_detections": 123,
+        "output": "datasets/raw/uttarakhand/labels/firms/manifest_viirs_noaa20_sp_2024-01-01_2024-12-31.json"
+      }
+    },
+    "california": {
+      "weather": {
+        "source": "Open-Meteo Archive API",
+        "daily_observations": 366,
+        "output": "datasets/raw/california/weather/open_meteo_daily_2024-01-01_2024-12-31.json"
+      },
+      "satellite": {
+        "source": "COPERNICUS/S2_SR_HARMONIZED via Google Earth Engine",
+        "scene_summaries": 131,
+        "output": "datasets/raw/california/satellite/sentinel2_ndvi_ndwi_2024-01-01_2024-12-31.geojson"
+      },
+      "labels": {
+        "source": "NASA FIRMS Area API / VIIRS_NOAA20_SP",
+        "chunks": 74,
+        "active_fire_detections": 2444,
+        "output": "datasets/raw/california/labels/firms/manifest_viirs_noaa20_sp_2024-01-01_2024-12-31.json"
+      }
+    },
+    "australia": {
+      "weather": {
+        "source": "Open-Meteo Archive API",
+        "daily_observations": 366,
+        "output": "datasets/raw/australia/weather/open_meteo_daily_2024-01-01_2024-12-31.json"
+      },
+      "satellite": {
+        "source": "COPERNICUS/S2_SR_HARMONIZED via Google Earth Engine",
+        "scene_summaries": 137,
+        "output": "datasets/raw/australia/satellite/sentinel2_ndvi_ndwi_2024-01-01_2024-12-31.geojson"
+      },
+      "labels": {
+        "source": "NASA FIRMS Area API / VIIRS_NOAA20_SP",
+        "chunks": 74,
+        "active_fire_detections": 285,
+        "output": "datasets/raw/australia/labels/firms/manifest_viirs_noaa20_sp_2024-01-01_2024-12-31.json"
+      }
+    }
+  }
+}
