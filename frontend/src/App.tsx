@@ -1,51 +1,24 @@
 import { useEffect, useState } from "react";
-import { GeoJSON, MapContainer, TileLayer, useMap } from "react-leaflet";
-import type { Feature, Polygon } from "geojson";
-import type { LatLngBoundsExpression } from "leaflet";
+import { Flame, Leaf, Satellite } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
 
-import "leaflet/dist/leaflet.css";
-
-type PlaceholderDashboard = {
-  phase_label: string;
-  risk_status: string;
-  health_status: string;
-  status_note: string;
-};
-
-type RegionSummary = {
-  region_id: string;
-  study_region_name: string;
-  aoi_name: string;
-  risk_target: string;
-  placeholder: PlaceholderDashboard;
-};
-
-type RegionDetail = RegionSummary & {
-  geometry_version: string;
-  aoi_geometry: Polygon;
-};
+import { AnimatedBackground } from "./components/AnimatedBackground";
+import { DataSourcesSection } from "./components/DataSourcesSection";
+import { Header } from "./components/Header";
+import { MapPanel } from "./components/MapPanel";
+import { PhaseProgress } from "./components/PhaseProgress";
+import { RegionHero } from "./components/RegionHero";
+import { StatusCard } from "./components/StatusCard";
+import type { RegionDetail, RegionSummary } from "./types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-function MapViewport({ geometry }: { geometry: Polygon }) {
-  const map = useMap();
-
-  useEffect(() => {
-    const coordinates = geometry.coordinates[0].map(([longitude, latitude]) => [
-      latitude,
-      longitude,
-    ]) as LatLngBoundsExpression;
-    map.fitBounds(coordinates, { padding: [36, 36] });
-  }, [geometry, map]);
-
-  return null;
-}
 
 function App() {
   const [regions, setRegions] = useState<RegionSummary[]>([]);
   const [selectedRegionId, setSelectedRegionId] = useState("uttarakhand");
   const [activeRegion, setActiveRegion] = useState<RegionDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/regions`)
@@ -61,9 +34,7 @@ function App() {
     const controller = new AbortController();
 
     setError(null);
-    fetch(`${API_BASE_URL}/api/regions/${selectedRegionId}`, {
-      signal: controller.signal,
-    })
+    fetch(`${API_BASE_URL}/api/regions/${selectedRegionId}`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Unable to load the selected AOI.");
         return response.json() as Promise<RegionDetail>;
@@ -78,82 +49,29 @@ function App() {
     return () => controller.abort();
   }, [selectedRegionId]);
 
-  if (error) {
-    return <main className="app-shell"><p className="error-message">{error}</p></main>;
-  }
-
-  if (!activeRegion) {
-    return <main className="app-shell"><p className="loading-message">Loading EarthDNA regions...</p></main>;
-  }
-
-  const feature: Feature<Polygon> = {
-    type: "Feature",
-    properties: { region_id: activeRegion.region_id },
-    geometry: activeRegion.aoi_geometry,
-  };
-
   return (
     <main className="app-shell">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Ecosystem Intelligence Platform</p>
-          <h1>EarthDNA</h1>
-        </div>
-        <label className="region-control">
-          <span>Study region</span>
-          <select
-            value={selectedRegionId}
-            onChange={(event) => setSelectedRegionId(event.target.value)}
-            aria-label="Select study region"
-          >
-            {regions.map((region) => (
-              <option key={region.region_id} value={region.region_id}>
-                {region.study_region_name} - {region.aoi_name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </header>
-
-      <section className="region-summary" aria-labelledby="region-heading">
-        <div>
-          <p className="eyebrow">Active Area of Interest</p>
-          <h2 id="region-heading">{activeRegion.study_region_name}</h2>
-          <p>{activeRegion.aoi_name} · Wildfire risk study</p>
-        </div>
-        <span className="placeholder-badge">{activeRegion.placeholder.phase_label}</span>
-      </section>
-
-      <section className="dashboard-grid">
-        <div className="map-panel">
-          <MapContainer className="aoi-map" center={[20, 0]} zoom={3} scrollWheelZoom>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <MapViewport geometry={activeRegion.aoi_geometry} />
-            <GeoJSON key={activeRegion.region_id} data={feature} style={{ color: "#087e8b", weight: 3, fillOpacity: 0.16 }} />
-          </MapContainer>
-          <p className="map-caption">Finalized AOI boundary · Geometry v{activeRegion.geometry_version}</p>
-        </div>
-
-        <div className="status-panel">
-          <article className="status-card">
-            <span>Wildfire Risk</span>
-            <strong>{activeRegion.placeholder.risk_status}</strong>
-            <small>{activeRegion.placeholder.phase_label}</small>
-          </article>
-          <article className="status-card">
-            <span>Ecosystem Health</span>
-            <strong>{activeRegion.placeholder.health_status}</strong>
-            <small>Health Score is not calculated in Phase 1.</small>
-          </article>
-          <article className="status-note">
-            <span>Integration Status</span>
-            <p>{activeRegion.placeholder.status_note}</p>
-          </article>
-        </div>
-      </section>
+      <AnimatedBackground />
+      <div className="dashboard-content">
+        <Header regions={regions} selectedRegionId={selectedRegionId} onRegionChange={setSelectedRegionId} />
+        {error && <p className="error-message" role="alert">{error}</p>}
+        {!activeRegion && !error && <p className="loading-message">Establishing EarthDNA observation link...</p>}
+        {activeRegion && (
+          <motion.div className="dashboard-body" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35 }}>
+            <RegionHero region={activeRegion} />
+            <section className="primary-dashboard" aria-label="Area of interest dashboard">
+              <MapPanel region={activeRegion} />
+              <aside className="status-panel" aria-label="Phase 1 status indicators">
+                <StatusCard icon={Flame} title="Wildfire risk" value={activeRegion.placeholder.risk_status} detail={activeRegion.placeholder.phase_label} tone="risk" index={0} />
+                <StatusCard icon={Leaf} title="Ecosystem health" value={activeRegion.placeholder.health_status} detail="Health Score is not calculated in Phase 1." tone="health" index={1} />
+                <StatusCard icon={Satellite} title="Integration status" value="AOI configuration is connected" detail="No operational prediction is shown." tone="integration" index={2} />
+              </aside>
+            </section>
+            <DataSourcesSection />
+            <PhaseProgress />
+          </motion.div>
+        )}
+      </div>
     </main>
   );
 }
